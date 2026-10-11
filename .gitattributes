@@ -1,0 +1,4 @@
+# 两个必交文本文件一律以 LF 存储与检出，
+# 确保压缩包内的文件能与 lab1-final 标签逐字节一致。
+requirements.md text eol=lf
+chat.txt       text eol=lf
