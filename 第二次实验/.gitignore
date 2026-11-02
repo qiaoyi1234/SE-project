@@ -1,0 +1,5 @@
+﻿# 构建产物与打包文件
+*.zip
+build/*.png
+build/*.docx
+ui_src/node_modules/

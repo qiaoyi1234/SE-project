@@ -1,0 +1,71 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 时序图（一）：并发预约（唯一索引兜底）
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam sequence {
+  ArrowColor #5B7DB1
+  ActorBorderColor #5B7DB1
+  LifeLineBorderColor #9FB4D0
+  ParticipantBackgroundColor #F7F9FC
+  ParticipantBorderColor #5B7DB1
+  GroupBorderColor #C9A227
+}
+hide footbox
+scale 1.35
+autonumber
+
+actor 买家A as A
+actor 买家B as B
+participant "预约页\n(买家 H5)" as UI
+participant "ReservationController" as C
+participant "TradeAppService" as T
+participant "ProductQueryApi\n(M2)" as PQ
+database "MySQL\nt_reservation" as DB
+
+par 同一时刻并发提交
+  A -> UI : 点击「预约」
+  UI -> C : POST /api/v1/reservations\n{productId: 1001}
+  C -> T : reserve(1001, buyerA)
+  activate T
+  T -> PQ : 商品状态 = 已发布？
+  PQ --> T : 是
+  T -> DB : INSERT (product_id=1001,\nstate='待卖家确认', active_key=1001)
+  DB --> T : 成功（占用唯一索引）
+  T -> DB : UPDATE 商品 → 已预约；写审计与通知
+  T --> C : reservationId
+  deactivate T
+  C --> UI : 201
+  UI --> A : 预约成功，显示 24 小时倒计时
+else
+  B -> UI : 点击「预约」
+  UI -> C : POST /api/v1/reservations\n{productId: 1001}
+  C -> T : reserve(1001, buyerB)
+  activate T
+  T -> PQ : 商品状态 = 已发布？
+  PQ --> T : 是（读到的是旧状态）
+  T -> DB : INSERT (product_id=1001,\nstate='待卖家确认', active_key=1001)
+  DB --> T : DuplicateKeyException\n(uk_reservation_active)
+  T -> T : 回滚，不写审计、不发通知
+  T --> C : BizException(40901)
+  deactivate T
+  C --> UI : 409 该商品已被预约
+  UI --> B : 提示「手慢了，商品已被预约」
+end
+
+note over DB
+  active_key 唯一索引是最终裁判：
+  不需要先查后插，也不需要锁商品行，
+  商品详情查询不会被预约事务阻塞。
+end note
+
+note over PQ
+  旧页面继续操作的情况在这里被拦住：
+  商品状态已变，本次请求返回 409，
+  不会产生两条有效预约。
+end note
+
+@enduml

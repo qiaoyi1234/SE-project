@@ -1,0 +1,60 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 活动图（一）：商品上架审核流程
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam activity {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+  DiamondBackgroundColor #FFF7E6
+  DiamondBorderColor #C9A227
+}
+skinparam swimlane {
+  BorderColor #8BA3C7
+  TitleBackgroundColor #E6EDF7
+}
+scale 1.4
+
+|卖家|
+start
+:创建商品（草稿）;
+:填写分类标签与初始价格;
+repeat
+  :提交审核\n守卫：状态为草稿/已驳回、本人、未封禁;
+  |系统|
+  if (守卫通过？) then (否)
+    :返回 403/409，商品状态不变;
+    stop
+  else (是)
+    :商品 → 待审核;
+    :写操作记录、通知管理员;
+  endif
+  |管理员|
+  :打开待审核列表并审核;
+  |系统|
+  if (审核通过？) then (通过)
+    :商品 → 已发布;
+    :写操作记录、通知卖家;
+    stop
+  else (驳回)
+    :商品 → 已驳回（记录驳回理由）;
+    :记卖家违约一次;
+    :统计 6 个月内违约次数;
+    if (满 5 次？) then (是)
+      :封禁卖家 6 个月;
+      :通知卖家与管理员;
+    endif
+    :通知卖家;
+    |卖家|
+    :修改商品信息;
+  endif
+repeat while (重新提交审核？) is (是) not (否)
+|卖家|
+:放弃上架;
+stop
+
+@enduml

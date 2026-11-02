@@ -1,0 +1,227 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 类图（一）：领域模型
+' v2：只放实体、枚举、关系与领域方法；服务与设计模式见下一张
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 28
+skinparam class {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+  HeaderBackgroundColor #E6EDF7
+  AttributeFontSize 12
+  StereotypeFontSize 11
+}
+skinparam enum {
+  BackgroundColor #FDF6E3
+  BorderColor #C9A227
+  ArrowColor #5B7DB1
+}
+hide circle
+hide empty members
+scale 1.5
+
+package "account 账号与权限" as ACC {
+  abstract class User {
+    - id : Long
+    - username : String
+    - passwordHash : String
+    - role : Role
+    - status : AccountStatus
+    - bannedUntil : LocalDateTime
+    + isBanned() : boolean
+    + hasRole(r : Role) : boolean
+  }
+  class Buyer {
+    + reserve(p : Product) : Reservation
+  }
+  class Seller {
+    + publish() : Product
+  }
+  class Admin {
+  }
+  class LoginAttempt {
+    - userId : Long
+    - failCount : int
+    - lockedUntil : LocalDateTime
+    + recordFailure() : void
+  }
+  enum "角色" as Role {
+    BUYER
+    SELLER
+    ADMIN
+  }
+  enum "账号状态" as AccountStatus {
+    NORMAL
+    LOCKED
+    BANNED
+  }
+}
+
+package "catalog 商品" as CAT {
+  class Product {
+    - id : Long
+    - sellerId : Long
+    - title : String
+    - price : BigDecimal
+    - categoryTag : String
+    - state : ProductState
+    - version : int
+    - deleted : boolean
+    + changePrice(p : BigDecimal) : void
+    + assertOwner(sellerId : Long) : void
+  }
+  class ProductImage {
+    - productId : Long
+    - url : String
+    - sort : int
+  }
+  enum "商品状态" as ProductState {
+    草稿
+    待审核
+    已驳回
+    已发布
+    已预约
+    交易中
+    已完成
+    已下架
+  }
+}
+
+package "trade 预约与交易" as TRD {
+  class Reservation {
+    - id : Long
+    - productId : Long
+    - buyerId : Long
+    - activeKey : Long
+    - state : ReservationState
+    - confirmDeadline : LocalDateTime
+    - createdAt : LocalDateTime
+    + isActive() : boolean
+  }
+  class Order {
+    - id : Long
+    - orderNo : String
+    - reservationId : Long
+    - productId : Long
+    - buyerId : Long
+    - sellerId : Long
+    - state : OrderState
+    - placeDeadline : LocalDateTime
+    + isOpen() : boolean
+  }
+  enum "预约状态" as ReservationState {
+    待卖家确认
+    已确认
+    已取消
+    已失效
+    已作废
+  }
+  enum "订单状态" as OrderState {
+    待下单
+    已下单
+    已完成
+    已取消
+    已作废
+  }
+}
+
+package "credit 信用与风控" as CRE {
+  class ViolationRecord {
+    - id : Long
+    - userId : Long
+    - type : ViolationType
+    - bizType : String
+    - bizId : Long
+    - occurredAt : LocalDateTime
+  }
+  class BanRecord {
+    - id : Long
+    - userId : Long
+    - startAt : LocalDateTime
+    - endAt : LocalDateTime
+    - status : String
+  }
+  class Report {
+    - id : Long
+    - reporterId : Long
+    - targetType : String
+    - targetId : Long
+    - reason : String
+    - status : ReportStatus
+  }
+  enum "违约类型" as ViolationType {
+    卖家确认超时
+    卖家违规下架
+    买家取消下单
+    经核实违规
+  }
+  enum "举报状态" as ReportStatus {
+    待处理
+    成立
+    不成立
+  }
+}
+
+package "notify 通知 / audit 审计" as NA {
+  class Notification {
+    - id : Long
+    - userId : Long
+    - type : String
+    - bizType : String
+    - bizId : Long
+    - isRead : boolean
+  }
+  class OperationLog {
+    - id : Long
+    - operatorId : Long
+    - action : String
+    - targetType : String
+    - targetId : Long
+    - beforeState : String
+    - afterState : String
+    - reason : String
+  }
+}
+
+' ---------------- 继承与关联 ----------------
+User <|-- Buyer
+User <|-- Seller
+User <|-- Admin
+User --> Role
+User --> AccountStatus
+User "1" -- "0..1" LoginAttempt : 登录失败计数 >
+
+Seller "1" -- "0..*" Product : 发布 >
+Product "1" *-- "0..*" ProductImage : 图片 >
+Product --> ProductState
+
+Product "1" -- "0..*" Reservation : 被预约 >
+Reservation --> ReservationState
+Reservation "0..1" -- "0..1" Order : 生成 >
+Order --> OrderState
+Buyer "1" -- "0..*" Reservation : 发起 >
+Buyer "1" -- "0..*" Order : 下单 >
+
+User "1" -- "0..*" ViolationRecord : 累计 >
+User "1" -- "0..*" BanRecord : 封禁 >
+User "1" -- "0..*" Report : 提交 >
+Report "0..*" ..> "0..1" User : 被举报人
+User "1" -- "0..*" Notification : 接收 >
+OperationLog "0..*" --> "1" User : 操作人
+
+note right of Reservation
+  activeKey 是数据库生成列：
+  有效（待卖家确认/已确认）时 = productId，
+  终态为 NULL，配合唯一索引
+  保证“同一商品只有一条有效预约”。
+end note
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 状态图（二）：预约（5 个状态）
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam state {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+  FontSize 13
+}
+hide empty description
+scale 1.4
+
+state "待卖家确认" as WaitSeller
+state "已确认" as Confirmed
+state "已取消" as Cancelled
+state "已失效" as Expired
+state "已作废" as Invalidated
+
+[*] --> WaitSeller : 买家预约（商品为已发布）
+WaitSeller --> Confirmed : 卖家在 24 小时内确认
+WaitSeller --> Cancelled : 买家主动取消
+WaitSeller --> Expired : 超过 24 小时未确认（系统）
+WaitSeller --> Invalidated : 商品被下架 / 删除
+Confirmed --> Invalidated : 商品被下架 / 删除
+
+Cancelled --> [*]
+Expired --> [*]
+Invalidated --> [*]
+
+note right of Confirmed
+  已确认之后买家的动作走订单：
+  下单（待下单 → 已下单）、
+  取消下单（记买家违约）。
+end note
+
+note bottom of Cancelled
+  已取消、已失效、已作废是终态，
+  不能再回到“已确认”（REQ-008 / REQ-029）。
+end note
+
+@enduml

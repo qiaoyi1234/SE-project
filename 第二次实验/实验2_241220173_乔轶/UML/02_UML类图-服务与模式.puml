@@ -1,0 +1,153 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 类图（二）：应用服务、状态机与端口
+' v2：状态转换表 + 守卫链；跨模块通过端口接口
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 18
+skinparam ranksep 30
+skinparam class {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+  HeaderBackgroundColor #E6EDF7
+  AttributeFontSize 12
+  StereotypeFontSize 11
+}
+skinparam interface {
+  BackgroundColor #EAF1F8
+  BorderColor #3D6098
+}
+skinparam enum {
+  BackgroundColor #FDF6E3
+  BorderColor #C9A227
+}
+hide circle
+hide empty members
+scale 1.5
+
+package "application 应用服务" as APP {
+  class ProductAppService {
+    + create(cmd) : Long
+    + submit(id) : void
+    + audit(id, pass, reason) : void
+    + changePrice(id, price) : void
+    + offline(id, operator, reason) : void
+  }
+  class TradeAppService {
+    + reserve(productId, buyerId) : Long
+    + confirm(reservationId, sellerId) : void
+    + place(orderId, buyerId) : void
+    + complete(orderId, operatorId) : void
+    + cancelOrder(orderId, buyerId) : void
+  }
+  class CreditAppService {
+    + record(userId, type, bizId) : void
+    + handleReport(reportId, valid, reason) : void
+  }
+  class NotificationAppService {
+    + send(userId, type, content) : void
+    + listUnread(userId) : List
+  }
+  class AuditAppService {
+    + query(q) : Page<OperationLog>
+  }
+  class StatisticsService {
+    + onSaleByCategory() : List
+    + tradesInRange(start, end) : int
+  }
+  class TimeoutJob {
+    - BATCH : int = 200
+    + scanExpiredReservations() : void
+    + scanExpiredOrders() : void
+  }
+}
+
+package "domain 领域规则" as DOM {
+  class ProductStateMachine {
+    - rules : Map<ProductState, Set<TransitionRule>>
+    + check(from, action) : ProductState
+    + fire(product, action, ctx) : void
+  }
+  class TransitionRule {
+    - from : ProductState
+    - action : TransitionAction
+    - to : ProductState
+  }
+  enum "转换动作" as TransitionAction {
+    提交审核
+    审核通过
+    审核驳回
+    买家预约
+    卖家确认
+    交付完成
+    卖家下架
+    管理员下架
+    释放回发布
+  }
+  interface Guard <<interface>> {
+    + check(ctx : TransitionContext) : void
+  }
+  class StateGuard
+  class RoleGuard
+  class OwnerGuard
+  class BanGuard
+  class ReasonGuard
+  class ContactVisibilityPolicy {
+    + canView(buyerId, sellerId, productId) : boolean
+  }
+}
+
+package "port 跨模块端口（接口定义在 M0）" as PORT {
+  interface ProductQueryApi <<interface>> {
+    + getState(productId) : ProductState
+    + isOwner(productId, sellerId) : boolean
+  }
+  interface CreditPort <<interface>> {
+    + record(userId, type, bizId) : void
+    + isBanned(userId) : boolean
+  }
+  interface NotifyPort <<interface>> {
+    + send(userId, type, content) : void
+  }
+  interface AuditPort <<interface>> {
+    + log(operatorId, action, targetType, targetId, before, after) : void
+  }
+}
+
+' ---------------- 依赖关系 ----------------
+ProductAppService --> ProductStateMachine : fire(product, action)
+TradeAppService --> ContactVisibilityPolicy : canView(...)
+TimeoutJob --> ProductAppService : 超时释放商品回已发布
+
+ProductAppService ..|> ProductQueryApi : catalog 实现
+CreditAppService ..|> CreditPort : credit 实现
+NotificationAppService ..|> NotifyPort : notify 实现
+AuditAppService ..|> AuditPort : audit 实现
+
+ProductStateMachine o-- TransitionRule
+ProductStateMachine --> Guard : 依次执行
+Guard <|.. StateGuard
+Guard <|.. RoleGuard
+Guard <|.. OwnerGuard
+Guard <|.. BanGuard
+Guard <|.. ReasonGuard
+
+note bottom of ProductStateMachine
+  静态表里只有 15 条规则；
+  不在表中的 (from, action)
+  一律抛 IllegalStateTransition；
+  守卫失败同样拒绝，状态不变。
+end note
+
+note bottom of PORT
+  各模块的 JDBC 仓储（ProductRepository 等）
+  只在本模块内部使用，不出现在跨模块依赖中。
+end note
+
+@enduml

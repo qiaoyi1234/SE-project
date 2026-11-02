@@ -1,0 +1,80 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 组件图：7 个业务模块 + 接入层 + 基础设施
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam componentStyle rectangle
+skinparam nodesep 26
+skinparam ranksep 34
+skinparam component {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+}
+skinparam databaseBackgroundColor #EAF1F8
+skinparam folderBackgroundColor #FBFBF7
+scale 1.5
+top to bottom direction
+
+package "客户端" as CLIENT {
+  [买家 H5\n搜索 · 预约 · 下单 · 消息] as buyer
+  [卖家 H5\n商品 · 审核提交 · 确认 · 交付] as seller
+  [管理员后台\n审核 · 举报 · 封禁 · 统计 · 审计] as admin
+}
+
+package "应用服务（market.jar，单实例）" as APP {
+  [接入层\n会话校验 · 角色鉴权 · 封禁拦截 · 统一异常] as api
+
+  package "业务模块" as MODS {
+    [M1 账号与权限] as m1
+    [M2 商品管理] as m2
+    [M3 商品检索] as m3
+    [M4 预约与交易] as m4
+    [M5 信用与风控] as m5
+    [M6 通知] as m6
+    [M7 审计与统计] as m7
+  }
+
+  [定时任务 TimeoutJob\n每 30 秒一批 200 条] as job
+}
+
+database "MySQL 8.0\nt_user / t_product / t_reservation / t_order ..." as db
+folder "本地图片目录" as fs
+
+buyer --> api : HTTPS / JSON
+seller --> api : HTTPS / JSON
+admin --> api : HTTPS / JSON
+
+api --> m1
+api --> m2
+api --> m3
+api --> m4
+api --> m5
+api --> m6
+api --> m7
+
+m3 ..> m2 : 只读查询
+m4 ..> m2 : 校验商品状态
+m4 ..> m1 : 角色与封禁
+m2 ..> m5 : 记违约
+m4 ..> m5 : 记违约
+m2 ..> m6 : 站内通知
+m4 ..> m6 : 站内通知
+m5 ..> m6 : 封禁/举报结果通知
+
+MODS --> db : MyBatis-Plus
+m2 --> fs : 图片读写
+job ..> m4 : 到期预约/订单
+job ..> m5 : 超时记违约
+
+note right of MODS
+  跨模块调用只走 M0 的端口接口
+  （ProductQueryApi / CreditPort /
+  NotifyPort / AuditPort），
+  不直接依赖对方实现类。
+end note
+
+@enduml

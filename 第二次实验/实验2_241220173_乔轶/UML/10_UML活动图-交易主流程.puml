@@ -1,0 +1,72 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 活动图（二）：预约 → 确认 → 下单 → 交付主流程
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam activity {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+  DiamondBackgroundColor #FFF7E6
+  DiamondBorderColor #C9A227
+}
+skinparam swimlane {
+  BorderColor #8BA3C7
+  TitleBackgroundColor #E6EDF7
+}
+scale 1.4
+
+|买家|
+start
+:搜索商品（关键词/分类/价格区间）;
+:查看商品详情;
+:点击「预约」;
+|系统|
+:校验商品状态 = 已发布\n插入预约（active_key = 商品 ID）;
+if (唯一索引冲突？) then (是)
+  :返回 409「该商品已被预约」;
+  stop
+else (否)
+  :预约 → 待卖家确认（截止 now + 24h）;
+  :商品 → 已预约;
+  :通知卖家;
+endif
+|卖家|
+:在 24 小时内处理预约;
+|系统|
+if (超时未确认？) then (是)
+  :预约 → 已失效；商品 → 已发布;
+  :记卖家违约一次;
+  :通知买家与管理员;
+  stop
+else (确认)
+  :预约 → 已确认；商品 → 交易中;
+  :同商品其余预约 → 已作废并通知;
+  :生成订单（待下单，截止 now + 24h）;
+  :通知买家;
+endif
+|买家|
+:在 24 小时内下单;
+|系统|
+if (超时未下单？) then (是)
+  :订单 → 已取消；商品 → 已发布;
+  :记买家违约一次;
+  :通知卖家;
+  stop
+else (下单)
+  :订单 → 已下单（生成唯一订单号）;
+  :通知卖家;
+endif
+|买家|
+:与卖家线下交付;
+|卖家|
+:确认交付完成;
+|系统|
+:订单 → 已完成；商品 → 已完成\n（同一事务）;
+:写操作记录、通知双方;
+stop
+
+@enduml

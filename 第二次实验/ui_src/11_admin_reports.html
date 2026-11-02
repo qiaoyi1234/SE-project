@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<link rel="stylesheet" href="admin.css">
+<title>举报处理与封禁</title></head>
+<body>
+<div class="sidebar">
+  <div class="brand"><div class="logo">二手</div><div><div class="name">校园二手</div><div class="sub">管理后台</div></div></div>
+  <div class="menu">
+    <div class="group">运营</div>
+    <div class="item"><span class="ico">▤</span>概览</div>
+    <div class="item"><span class="ico">✓</span>商品审核<span class="count">3</span></div>
+    <div class="item active"><span class="ico">⚑</span>举报处理<span class="count">2</span></div>
+    <div class="item"><span class="ico">⊘</span>违约与封禁</div>
+    <div class="group">数据</div>
+    <div class="item"><span class="ico">▦</span>统计报表</div>
+    <div class="item"><span class="ico">☰</span>操作记录</div>
+  </div>
+  <div class="foot">同一用户 6 个月内违约满 5 次<br>自动封禁 6 个月</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="crumb">运营 / <b>举报处理</b></div>
+    <div class="spacer"></div>
+    <div class="tsearch">⌕ 搜索举报人 / 被举报对象</div>
+    <div class="avatar">🧑‍🏫</div>
+    <div class="who">赵老师<br><span>管理员</span></div>
+  </div>
+
+  <div class="content" style="display:flex;gap:0;padding:0;">
+    <div style="flex:1;padding:20px 24px;min-width:0;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div class="page-title">举报处理</div>
+          <div class="page-sub">核实成立时记被举报方违约一次；同一举报人对同一对象的重复举报只计一次</div>
+        </div>
+        <div class="seg">
+          <div class="s on">待处理 2</div><div class="s">已成立</div><div class="s">不成立</div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:0;overflow:hidden;">
+        <table>
+          <tr><th>举报人</th><th>被举报对象</th><th>原因</th><th>提交时间</th><th>状态</th><th>操作</th></tr>
+          <tr style="background:#FFFBF8;">
+            <td><div class="t">陈同学</div><div class="s">买家 · 3 号楼</div></td>
+            <td><div class="t">「宿舍折叠椅」</div><div class="s">商品 ID 1010 · 卖家 王同学</div></td>
+            <td>描述与实际不符，到现场发现椅子腿断裂</td>
+            <td>10-31 13:20</td>
+            <td><span class="tag amber">待处理</span></td>
+            <td><span class="btn-a sm primary">处理</span></td>
+          </tr>
+          <tr>
+            <td><div class="t">林同学</div><div class="s">卖家 · 6 号楼</div></td>
+            <td><div class="t">王同学</div><div class="s">用户 ID 2003 · 买家</div></td>
+            <td>预约后多次爽约，联系不上</td>
+            <td>10-30 18:44</td>
+            <td><span class="tag amber">待处理</span></td>
+            <td><span class="btn-a sm">处理</span></td>
+          </tr>
+          <tr>
+            <td><div class="t">赵同学</div><div class="s">买家 · 2 号楼</div></td>
+            <td><div class="t">「考研数学全套」</div><div class="s">商品 ID 1002 · 卖家 陈同学</div></td>
+            <td>已预约但卖家超时未确认</td>
+            <td>10-29 09:05</td>
+            <td><span class="tag gray">已成立</span></td>
+            <td><span class="btn-a sm ghost">查看</span></td>
+          </tr>
+          <tr>
+            <td><div class="t">孙同学</div><div class="s">买家 · 7 号楼</div></td>
+            <td><div class="t">「跑鞋 42 码」</div><div class="s">商品 ID 1005 · 卖家 周同学</div></td>
+            <td>怀疑是商业转售</td>
+            <td>10-28 15:30</td>
+            <td><span class="tag gray">不成立</span></td>
+            <td><span class="btn-a sm ghost">查看</span></td>
+          </tr>
+        </table>
+        <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #F2F4F8;">
+          <span style="font-size:12px;color:#9AA2B1;">共 4 条 · 第 1 / 1 页</span>
+          <span style="font-size:12px;color:#9AA2B1;">举报告知：处理结果会通知举报人与被举报人</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer">
+      <div class="head">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:14px;font-weight:600;">处理举报 · 王同学</span>
+          <span style="color:#9AA2B1;font-size:16px;">✕</span>
+        </div>
+        <div class="page-sub">用户 ID 2003 · 注册于 2026-03-11</div>
+      </div>
+      <div class="body">
+        <div class="panel" style="padding:14px;background:#FAFBFD;box-shadow:none;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+            <div>
+              <div style="font-size:12px;color:#9AA2B1;">6 个月内违约次数</div>
+              <div style="font-size:24px;font-weight:700;margin-top:4px;">4 <span style="font-size:13px;color:#9AA2B1;font-weight:400;">/ 5</span></div>
+            </div>
+            <span class="tag amber">再 1 次封禁</span>
+          </div>
+          <div style="height:6px;background:#E8EBF1;border-radius:3px;margin-top:12px;overflow:hidden;">
+            <div style="width:80%;height:6px;background:linear-gradient(90deg,#FFB48F,#FF5A1F);border-radius:3px;"></div>
+          </div>
+        </div>
+
+        <div style="font-size:12px;font-weight:600;margin:16px 0 8px;">违约记录</div>
+        <div style="font-size:12px;line-height:22px;color:#5B6472;">
+          · 10-30 买家取消下单（订单 SO20261030012）<br>
+          · 10-22 买家超时未下单（订单 SO20261022007）<br>
+          · 09-30 举报核实成立（商品「宿舍折叠椅」）<br>
+          · 09-12 买家取消下单（订单 SO20260912003）
+        </div>
+
+        <div style="font-size:12px;font-weight:600;margin:16px 0 8px;">本次处理</div>
+        <div style="display:flex;gap:10px;">
+          <div class="btn-a sm" style="flex:1;">举报不成立</div>
+          <div class="btn-a sm danger" style="flex:1;">成立并记违约</div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#9AA2B1;line-height:18px;">
+          选择「成立」后，被举报方违约 +1；若累计满 5 次，系统自动封禁 6 个月并通知本人。
+        </div>
+      </div>
+      <div class="foot">
+        <div class="btn-a ghost" style="flex:1;">解除封禁</div>
+        <div class="btn-a primary" style="flex:1.2;">提交处理结果</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

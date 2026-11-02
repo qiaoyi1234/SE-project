@@ -1,0 +1,67 @@
+﻿@startuml
+' ============================================================
+' 二手交易系统 UML 用例图（一）：买家与卖家
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+}
+skinparam actorStyle stick
+scale 1.4
+left to right direction
+
+actor 买家 as B
+actor 卖家 as S
+
+together {
+  package "账号" {
+    usecase "注册 / 登录" as UC01
+  }
+  package "商品与检索" {
+    usecase "搜索并查看商品" as UC10
+    usecase "发布商品（含提交审核）" as UC11
+    usecase "下架商品 / 调整价格" as UC12
+  }
+  package "预约与交易" {
+    usecase "预约商品" as UC20
+    usecase "确认预约（24 小时内）" as UC21
+    usecase "买家下单" as UC22
+    usecase "取消预约 / 取消下单" as UC23
+    usecase "完成交易（线下交付）" as UC24
+    usecase "查看交易对方联系方式" as UC25
+  }
+  package "信用" {
+    usecase "提交举报" as UC30
+  }
+}
+
+B --> UC01
+B --> UC10
+B --> UC20
+B --> UC22
+B --> UC23
+B --> UC24
+B --> UC25
+B --> UC30
+
+S --> UC01
+S --> UC10
+S --> UC11
+S --> UC12
+S --> UC21
+S --> UC24
+S --> UC25
+S --> UC30
+
+note bottom of UC30
+  所有用例均需先登录（«include» 注册 / 登录），图中省略该连线。
+end note
+
+@enduml
+

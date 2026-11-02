@@ -1,0 +1,83 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 时序图（二）：卖家确认 → 买家下单 → 交付完成
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam sequence {
+  ArrowColor #5B7DB1
+  ActorBorderColor #5B7DB1
+  LifeLineBorderColor #9FB4D0
+  ParticipantBackgroundColor #F7F9FC
+  ParticipantBorderColor #5B7DB1
+  GroupBorderColor #C9A227
+}
+hide footbox
+scale 1.35
+autonumber
+
+actor 卖家 as S
+actor 买家 as B
+participant "H5 前端" as UI
+participant "TradeController" as C
+participant "TradeAppService" as T
+participant "ProductAppService\n(M2)" as PS
+participant "ReservationRepository" as RR
+participant "OrderRepository" as OR
+participant "端口\nCredit/Notify/Audit" as P
+
+== 阶段一：卖家确认预约 ==
+S -> UI : 点击「确认预约」
+UI -> C : POST /api/v1/reservations/{id}/confirm
+C -> T : confirm(reservationId, sellerId)
+activate T
+T -> T : 开启事务
+T -> RR : 查预约（待卖家确认）
+T -> PS : 校验商品状态与归属
+alt 已超时 / 非本人 / 状态已变
+  T --> C : BizException
+  C --> UI : 409 / 403
+  UI --> S : 提示原因，预约状态不变
+else 校验通过
+  T -> RR : 预约 → 已确认
+  T -> RR : 同商品其余预约 → 已作废
+  T -> PS : 商品 → 交易中
+  T -> OR : 生成订单（待下单，截止 now+24h）
+  T -> P : 写审计、通知落库
+  T -> T : 提交事务
+  T --> C : orderNo
+  C --> UI : 200
+  UI --> S : 显示「交易中，等待买家下单」
+end
+deactivate T
+note over P : 事务提交后由 AFTER_COMMIT 推送未读数
+
+== 阶段二：买家下单 ==
+B -> UI : 点击「立即下单」
+UI -> C : POST /api/v1/orders/{id}/place
+C -> T : place(orderId, buyerId)
+activate T
+T -> OR : 订单：待下单 → 已下单
+T -> P : 写审计、通知卖家
+T -> T : 提交事务
+T --> C : orderNo
+deactivate T
+C --> UI : 200
+UI --> B : 展示订单号与卖家联系方式
+
+== 阶段三：线下交付完成 ==
+S -> UI : 点击「确认交付完成」
+UI -> C : POST /api/v1/orders/{id}/complete
+C -> T : complete(orderId, sellerId)
+activate T
+T -> OR : 订单 → 已完成
+T -> PS : 商品 → 已完成（同一事务）
+T -> P : 写审计、通知双方
+T -> T : 提交事务
+deactivate T
+C --> UI : 200
+note over T : 订单与商品在同一事务内变更，避免“订单完成但商品还在交易中”
+
+@enduml

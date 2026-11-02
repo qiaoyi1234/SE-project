@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<link rel="stylesheet" href="admin.css">
+<title>商品审核</title></head>
+<body>
+<div class="sidebar">
+  <div class="brand"><div class="logo">二手</div><div><div class="name">校园二手</div><div class="sub">管理后台</div></div></div>
+  <div class="menu">
+    <div class="group">运营</div>
+    <div class="item"><span class="ico">▤</span>概览</div>
+    <div class="item active"><span class="ico">✓</span>商品审核<span class="count">3</span></div>
+    <div class="item"><span class="ico">⚑</span>举报处理<span class="count">2</span></div>
+    <div class="item"><span class="ico">⊘</span>违约与封禁</div>
+    <div class="group">数据</div>
+    <div class="item"><span class="ico">▦</span>统计报表</div>
+    <div class="item"><span class="ico">☰</span>操作记录</div>
+  </div>
+  <div class="foot">数据保留：操作记录与举报保存 1 年<br>当前登录：管理员 · 赵老师</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="crumb">运营 / <b>商品审核</b></div>
+    <div class="spacer"></div>
+    <div class="tsearch">⌕ 搜索商品标题 / 卖家</div>
+    <div class="avatar">🧑‍🏫</div>
+    <div class="who">赵老师<br><span>管理员</span></div>
+  </div>
+
+  <div class="content" style="display:flex;gap:0;padding:0;">
+    <div style="flex:1;padding:20px 24px;min-width:0;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div class="page-title">商品审核</div>
+          <div class="page-sub">审核通过后商品才会出现在买家搜索结果中；驳回必须填写理由，并记卖家违约一次</div>
+        </div>
+        <div class="seg">
+          <div class="s on">待审核 3</div><div class="s">已通过</div><div class="s">已驳回</div><div class="s">全部</div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:0;overflow:hidden;">
+        <table>
+          <tr><th style="width:34px;"><input type="checkbox"></th><th>商品</th><th>卖家</th><th>分类</th><th>价格</th><th>提交时间</th><th>操作</th></tr>
+          <tr style="background:#FFFBF8;">
+            <td><input type="checkbox" checked></td>
+            <td>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <div class="thumb-s" style="background:linear-gradient(135deg,#A7C0E8,#6E8FC7);">⌨️</div>
+                <div><div class="t">罗技 K380 蓝牙键盘，九成新</div><div class="s">ID 1001 · 3 张图片</div></div>
+              </div>
+            </td>
+            <td><div class="t">林同学</div><div class="s">6 号楼 · 成交 12</div></td>
+            <td>数码</td><td>¥120</td><td>10-31 09:12</td>
+            <td><span class="btn-a sm primary">审核</span></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <div class="thumb-s" style="background:linear-gradient(135deg,#F6C48A,#E39B57);">📚</div>
+                <div><div class="t">考研数学全套教材 + 真题</div><div class="s">ID 1002 · 2 张图片</div></div>
+              </div>
+            </td>
+            <td><div class="t">陈同学</div><div class="s">3 号楼 · 成交 4</div></td>
+            <td>图书</td><td>¥45</td><td>10-31 10:40</td>
+            <td><span class="btn-a sm">审核</span></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <div class="thumb-s" style="background:linear-gradient(135deg,#9FD8C1,#63B394);">💡</div>
+                <div><div class="t">宿舍护眼台灯，三档调光</div><div class="s">ID 1003 · 1 张图片</div></div>
+              </div>
+            </td>
+            <td><div class="t">王同学</div><div class="s">5 号楼 · 成交 1</div></td>
+            <td>生活</td><td>¥35</td><td>10-31 11:05</td>
+            <td><span class="btn-a sm">审核</span></td>
+          </tr>
+        </table>
+        <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #F2F4F8;">
+          <span style="font-size:12px;color:#9AA2B1;">共 3 条待审核 · 已选 1 条</span>
+          <span class="btn-a sm">批量通过</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer">
+      <div class="head">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:14px;font-weight:600;">审核详情 · ID 1001</span>
+          <span style="color:#9AA2B1;font-size:16px;">✕</span>
+        </div>
+        <div class="page-sub">提交于 10-31 09:12，当前状态「待审核」</div>
+      </div>
+      <div class="body">
+        <div style="height:130px;border-radius:10px;background:linear-gradient(135deg,#A7C0E8,#6E8FC7);
+                    display:flex;align-items:center;justify-content:center;font-size:46px;">⌨️</div>
+        <div style="font-size:15px;font-weight:600;margin-top:12px;">罗技 K380 蓝牙键盘，九成新，手感很好</div>
+        <div style="font-size:12px;color:#5B6472;line-height:20px;margin-top:8px;">
+          买来用了两个月，键帽无磨损，蓝牙连三台设备都正常。原包装和说明书都在，宿舍楼下自提，可以当面验货。
+        </div>
+        <div style="margin-top:12px;">
+          <div class="kv"><span class="k">分类标签</span><span class="v">数码 / 键盘</span></div>
+          <div class="kv"><span class="k">价格</span><span class="v">¥120（原价 299）</span></div>
+          <div class="kv"><span class="k">卖家</span><span class="v">林同学 · 无违约记录</span></div>
+          <div class="kv"><span class="k">历史驳回</span><span class="v">0 次</span></div>
+        </div>
+        <div style="margin-top:14px;font-size:12px;color:#9AA2B1;">审核意见（驳回时必填）</div>
+        <div style="margin-top:8px;height:64px;border:1px solid #E8EBF1;border-radius:8px;padding:10px;
+                    font-size:12px;color:#9AA2B1;">例如：描述含「全新代购」字样，疑似商业转售……</div>
+      </div>
+      <div class="foot">
+        <div class="btn-a danger" style="flex:1;">驳回并记违约</div>
+        <div class="btn-a primary" style="flex:1.2;">通过并发布</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

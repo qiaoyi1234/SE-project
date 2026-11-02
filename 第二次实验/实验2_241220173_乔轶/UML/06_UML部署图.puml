@@ -1,0 +1,53 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 部署图：单机单实例（对应 REQ-020 约定环境）
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam node {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+}
+skinparam artifact {
+  BackgroundColor #FFFFFF
+  BorderColor #8BA3C7
+}
+skinparam databaseBackgroundColor #EAF1F8
+skinparam nodesep 30
+skinparam ranksep 40
+scale 1.5
+left to right direction
+
+node "买家 / 卖家设备\n（手机浏览器）" as CLIENT {
+  artifact "买家 H5 / 卖家 H5\nVue 3 + Vant 4" as H5
+}
+
+node "管理员 PC\n（浏览器）" as ADMINPC {
+  artifact "管理后台\nVue 3 + Element Plus" as ADM
+}
+
+node "应用服务器\n4 核 / 8 GB / SSD" as APP {
+  artifact "Nginx :443\n静态资源 + 反向代理" as NGX
+  artifact "market.jar\nSpring Boot :8080 / -Xmx2g" as JAR
+  artifact "定时任务线程\n每 30 秒扫描到期记录" as JOB
+  folder "本地图片目录\n/data/market/images" as IMG
+}
+
+database "MySQL 8.0\n:3306（单实例）" as DB
+
+CLIENT --> NGX : HTTPS
+ADMINPC --> NGX : HTTPS
+NGX --> JAR : /api/v1/**
+JAR --> DB : JDBC
+JAR --> IMG : 读写
+JOB --> DB : 扫描到期预约/订单
+
+note bottom of APP
+  单实例部署，不启用集群、Redis、消息队列，
+  与实验一 REQ-020 约定的测试环境一致。
+end note
+
+@enduml

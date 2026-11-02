@@ -1,0 +1,60 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 时序图（三）：超时扫描（分批 + 幂等）
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam sequence {
+  ArrowColor #5B7DB1
+  LifeLineBorderColor #9FB4D0
+  ParticipantBackgroundColor #F7F9FC
+  ParticipantBorderColor #5B7DB1
+  GroupBorderColor #C9A227
+}
+hide footbox
+scale 1.35
+autonumber
+
+participant "TimeoutJob\n每 30 秒" as J
+participant "ReservationRepository" as RR
+participant "ProductAppService\n(M2)" as PS
+participant "CreditPort\n(M5)" as CP
+participant "AuditPort\n(M7)" as AP
+participant "NotifyPort\n(M6)" as NP
+database "MySQL 8.0" as DB
+
+J -> RR : select id from t_reservation\nwhere state='待卖家确认' and confirm_deadline < now()\norder by confirm_deadline limit 200
+RR --> J : 一批预约 id（走 idx_reservation_deadline）
+
+loop 逐条处理（每条一个短事务）
+  J -> RR : update t_reservation set state='已失效'\nwhere id=? and state='待卖家确认'
+  RR --> J : 影响行数 affected
+  alt affected = 0
+    J -> J : 已被其它流程处理，跳过
+  else affected = 1
+    J -> PS : 释放商品：已预约 → 已发布
+    J -> CP : record(卖家, 卖家确认超时)
+    J -> AP : log(操作人=系统, before=待卖家确认, after=已失效)
+    J -> NP : send(买家, 预约已失效)；send(管理员, 卖家超时)
+  end
+end
+
+alt 本批取满 200 条
+  J -> J : 立即取下一批
+else 未取满
+  J -> J : 本轮结束，等待下一次调度
+end
+
+note over J
+  幂等：处理结果以 UPDATE 的影响行数为准，
+  任务重跑或两批重叠都不会重复记违约、重复通知。
+end note
+
+note over DB
+  单实例部署，定时任务只在一个进程里跑；
+  即使将来多实例，幂等更新也能保证不重复处理。
+end note
+
+@enduml

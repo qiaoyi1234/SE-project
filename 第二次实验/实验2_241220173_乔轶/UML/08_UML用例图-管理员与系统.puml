@@ -1,0 +1,51 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 用例图（二）：管理员与系统
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+}
+skinparam actorStyle stick
+scale 1.4
+left to right direction
+
+actor 管理员 as A
+actor "系统计时器" as T
+
+package "商品治理" {
+  usecase "审核商品（通过 / 驳回）" as UC40
+  usecase "删除违规商品" as UC41
+}
+
+package "信用与风控" {
+  usecase "处理举报" as UC42
+  usecase "违约与封禁管理" as UC43
+}
+
+package "审计与统计" {
+  usecase "查看统计报表" as UC44
+  usecase "查询操作记录" as UC45
+}
+
+package "系统调度" {
+  usecase "超时自动失效 / 自动取消" as UC46
+}
+
+A --> UC40
+A --> UC41
+A --> UC42
+A --> UC43
+A --> UC44
+A --> UC45
+T --> UC46
+
+UC42 ..> UC43 : «include»
+
+@enduml

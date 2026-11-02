@@ -1,0 +1,52 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 包图：后端模块包与允许的依赖
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam packageStyle rectangle
+skinparam nodesep 24
+skinparam ranksep 34
+skinparam package {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+  FontSize 13
+}
+skinparam arrowColor #5B7DB1
+scale 1.5
+
+package "M1 账号与权限\napi / application / domain / infrastructure" as M1
+package "M2 商品管理\napi / application / domain / infrastructure" as M2
+package "M3 商品检索\napi / application / domain（只读）" as M3
+package "M4 预约与交易\napi / application / domain / infrastructure" as M4
+package "M5 信用与风控\napi / application / domain / infrastructure" as M5
+package "M6 通知\napi / application / domain / infrastructure" as M6
+package "M7 审计与统计\napi / application / domain / infrastructure" as M7
+package "M0 公共层\nport / event / exception / web / util" as M0
+
+M2 ..> M1 : 角色与封禁
+M3 ..> M2 : 只读查询
+M4 ..> M2 : 商品状态
+M4 ..> M1 : 角色与封禁
+M2 ..> M5 : 记违约
+M4 ..> M5 : 记违约
+M5 ..> M1 : 用户信息
+M6 ..> M1 : 收件人
+M2 ..> M6 : 通知
+M4 ..> M6 : 通知
+M5 ..> M6 : 通知
+M7 ..> M0 : 实现 AuditPort
+
+note right of M0
+  依赖规则：
+  0) M1~M7 编译期都依赖 M0（连线省略）；
+  1) 只能依赖 M0 的端口与事件，不跨模块访问表；
+  2) M2 不依赖 M4（下架级联走 ProductOfflineEvent）；
+  3) M7 只被 M0 的 AuditPort 调用，不反向依赖业务模块。
+end note
+
+@enduml
+

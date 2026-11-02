@@ -1,0 +1,47 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 状态图（三）：订单（5 个状态）
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam state {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+  FontSize 13
+}
+hide empty description
+scale 1.4
+
+state "待下单" as WaitPlace
+state "已下单" as Placed
+state "已完成" as Completed
+state "已取消" as Cancelled
+state "已作废" as Invalidated
+
+[*] --> WaitPlace : 卖家确认预约后生成
+WaitPlace --> Placed : 买家下单（24 小时内）
+WaitPlace --> Cancelled : 超过 24 小时未下单（系统）
+Placed --> Completed : 线下交付完成
+WaitPlace --> Invalidated : 商品被下架 / 删除
+Placed --> Invalidated : 商品被下架 / 删除
+
+Completed --> [*]
+Cancelled --> [*]
+Invalidated --> [*]
+
+note right of Completed
+  订单进入终态时与商品联动：
+  完成 → 商品同时变“已完成”（同一事务）；
+  取消/作废 → 商品回到“已发布”
+  （商品已下架的情形除外）。
+end note
+
+note bottom of WaitPlace
+  禁止：待下单 → 已完成（跳过下单与交付）；
+  已完成、已取消、已作废 → 任何状态（REQ-024）。
+end note
+
+@enduml

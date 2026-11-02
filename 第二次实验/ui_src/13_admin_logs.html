@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<link rel="stylesheet" href="admin.css">
+<title>操作记录</title></head>
+<body>
+<div class="sidebar">
+  <div class="brand"><div class="logo">二手</div><div><div class="name">校园二手</div><div class="sub">管理后台</div></div></div>
+  <div class="menu">
+    <div class="group">运营</div>
+    <div class="item"><span class="ico">▤</span>概览</div>
+    <div class="item"><span class="ico">✓</span>商品审核<span class="count">3</span></div>
+    <div class="item"><span class="ico">⚑</span>举报处理<span class="count">2</span></div>
+    <div class="item"><span class="ico">⊘</span>违约与封禁</div>
+    <div class="group">数据</div>
+    <div class="item"><span class="ico">▦</span>统计报表</div>
+    <div class="item active"><span class="ico">☰</span>操作记录</div>
+  </div>
+  <div class="foot">操作记录与业务同事务写入，<br>不可修改、不可删除，保存 1 年</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="crumb">数据 / <b>操作记录</b></div>
+    <div class="spacer"></div>
+    <div class="tsearch">⌕ 按操作人 / 对象 ID 搜索</div>
+    <div class="avatar">🧑‍🏫</div>
+    <div class="who">赵老师<br><span>管理员</span></div>
+  </div>
+
+  <div class="content">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;">
+      <div>
+        <div class="page-title">操作记录</div>
+        <div class="page-sub">覆盖提交审核、审核、预约、确认、下单、取消、下架、删除、违约、封禁、举报处理</div>
+      </div>
+      <div class="btn-a">导出（TODO）</div>
+    </div>
+
+    <div class="panel" style="padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div class="input">2026-10-01 ~ 2026-10-31 ⌄</div>
+      <div class="input">操作类型：全部 ⌄</div>
+      <div class="input">操作人：全部 ⌄</div>
+      <div class="input" style="width:150px;">对象 ID：1001</div>
+      <div class="btn-a primary">查询</div>
+      <div class="btn-a ghost">重置</div>
+      <div style="margin-left:auto;font-size:12px;color:#9AA2B1;">共 1,286 条</div>
+    </div>
+
+    <div class="panel" style="padding:0;overflow:hidden;margin-top:16px;">
+      <table>
+        <tr><th>时间</th><th>操作人</th><th>角色</th><th>操作</th><th>对象</th><th>状态变化</th><th>原因 / 备注</th></tr>
+        <tr><td>10-31 16:08:12</td><td>陈同学</td><td><span class="tag blue">买家</span></td><td>买家下单</td><td>订单 SO20261031008</td><td>待下单 → 已下单</td><td>—</td></tr>
+        <tr><td>10-31 15:02:44</td><td>林同学</td><td><span class="tag blue">卖家</span></td><td>确认预约</td><td>预约 R9001</td><td>待卖家确认 → 已确认</td><td>同商品其余 1 条预约已作废</td></tr>
+        <tr><td>10-31 14:20:03</td><td>陈同学</td><td><span class="tag blue">买家</span></td><td>预约商品</td><td>商品 1002 / 预约 R9001</td><td>已发布 → 已预约</td><td>—</td></tr>
+        <tr><td>10-31 11:20:31</td><td>赵老师</td><td><span class="tag amber">管理员</span></td><td>审核驳回</td><td>商品 1005</td><td>待审核 → 已驳回</td><td>描述含「全新代购」字样，疑似商业转售</td></tr>
+        <tr><td>10-31 09:40:07</td><td>林同学</td><td><span class="tag blue">卖家</span></td><td>调整价格</td><td>商品 1001</td><td>价格 150 → 120</td><td>—</td></tr>
+        <tr><td>10-31 09:12:55</td><td>林同学</td><td><span class="tag blue">卖家</span></td><td>提交审核</td><td>商品 1001</td><td>草稿 → 待审核</td><td>—</td></tr>
+        <tr><td>10-30 18:44:26</td><td>林同学</td><td><span class="tag blue">卖家</span></td><td>提交举报</td><td>用户 2003</td><td>—</td><td>预约后多次爽约，联系不上</td></tr>
+        <tr><td>10-30 10:15:09</td><td>系统</td><td><span class="tag gray">系统</span></td><td>预约超时失效</td><td>预约 R8998 / 商品 1012</td><td>待卖家确认 → 已失效</td><td>超 24 小时未确认，记卖家违约一次</td></tr>
+        <tr><td>10-29 20:02:18</td><td>赵老师</td><td><span class="tag amber">管理员</span></td><td>下架商品</td><td>商品 1010</td><td>已预约 → 已下架</td><td>举报核实成立：描述与实物不符</td></tr>
+        <tr><td>10-29 20:02:18</td><td>系统</td><td><span class="tag gray">系统</span></td><td>作废预约</td><td>预约 R8990</td><td>已确认 → 已作废</td><td>商品被下架，级联作废</td></tr>
+      </table>
+      <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #F2F4F8;">
+        <span style="font-size:12px;color:#9AA2B1;">第 1 / 129 页 · 每页 10 条</span>
+        <div style="display:flex;gap:6px;">
+          <span class="btn-a sm ghost">上一页</span>
+          <span class="btn-a sm primary">1</span>
+          <span class="btn-a sm">2</span>
+          <span class="btn-a sm">3</span>
+          <span class="btn-a sm">下一页</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

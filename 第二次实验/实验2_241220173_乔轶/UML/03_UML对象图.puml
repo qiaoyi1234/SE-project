@@ -1,0 +1,72 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 对象图：某商品在某一时刻的对象快照
+' 说明唯一索引 activeKey 的作用
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam object {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+  AttributeFontSize 12
+}
+skinparam nodesep 26
+skinparam ranksep 36
+scale 1.5
+
+object "p1001 : Product" as p {
+  id = 1001
+  title = "罗技 K380 键盘（九成新）"
+  sellerId = 3001
+  price = 120.00
+  state = 交易中
+  deleted = false
+}
+
+object "r9001 : Reservation" as r1 {
+  id = 9001
+  productId = 1001
+  buyerId = 2001
+  state = 已确认
+  activeKey = 1001
+  confirmDeadline = 2026-11-03 10:00
+}
+
+object "r9000 : Reservation" as r0 {
+  id = 9000
+  productId = 1001
+  buyerId = 2002
+  state = 已失效
+  activeKey = null
+  confirmDeadline = 2026-11-02 09:30
+}
+
+object "o7001 : Order" as o {
+  id = 7001
+  orderNo = "SO20261102001"
+  reservationId = 9001
+  state = 待下单
+  placeDeadline = 2026-11-03 10:00
+}
+
+p -- r1 : 当前有效预约
+p -- r0 : 历史失效预约
+r1 -- o : 已确认后生成
+
+note right of r0
+  r9000 已进入终态，activeKey 为 NULL；
+  NULL 不参与唯一索引，所以同一商品
+  可以继续被预约。
+end note
+
+note bottom of r1
+  有效预约（待卖家确认 / 已确认）
+  的 activeKey = productId，
+  唯一索引 uk_reservation_active
+  保证同一商品只有一行这样的记录。
+end note
+
+@enduml

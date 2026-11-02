@@ -1,0 +1,56 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 状态图（一）：商品（8 个状态 / 15 条允许转换）
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam state {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+  FontSize 13
+}
+hide empty description
+scale 1.4
+
+state "草稿" as Draft
+state "待审核" as Pending
+state "已驳回" as Rejected
+state "已发布" as Published
+state "已预约" as Reserved
+state "交易中" as Trading
+state "已完成" as Completed
+state "已下架" as Offline
+
+[*] --> Draft : 卖家创建商品
+Draft --> Pending : 提交审核
+Pending --> Published : 管理员审核通过
+Pending --> Rejected : 管理员驳回（填理由、记违约）
+Rejected --> Pending : 修改后重新提交
+Published --> Reserved : 买家预约
+Reserved --> Trading : 卖家确认（24 小时内）
+Trading --> Completed : 线下交付完成
+Published --> Offline : 卖家下架
+Reserved --> Offline : 卖家下架 / 管理员下架
+Trading --> Offline : 管理员下架（须有违规依据）
+Reserved --> Published : 预约取消 / 超时失效
+Trading --> Published : 订单取消 / 超时未下单
+Offline --> Pending : 重新提交审核
+Completed --> [*]
+
+note right of Completed
+  禁止的转换由状态表兜底：
+  已完成 → 任何状态；
+  已下架 → 未经审核直接回“已发布”；
+  待审核 → 已预约 / 交易中 / 已完成；
+  已预约 → 已完成（跳步）。
+end note
+
+note bottom of Offline
+  已下架的商品只能重新提交审核，
+  不能直接回到已发布（REQ-029）。
+end note
+
+@enduml
