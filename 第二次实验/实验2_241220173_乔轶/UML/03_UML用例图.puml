@@ -1,0 +1,109 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 用例图（v1 初稿）
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+}
+skinparam actorStyle stick
+left to right direction
+scale 1.4
+
+actor 买家 as B
+actor 卖家 as S
+actor 管理员 as A
+actor "系统计时器" as T
+
+package "账号与权限" {
+  usecase "注册账号" as UC01
+  usecase "登录系统" as UC02
+  usecase "封禁状态校验" as UC03
+}
+
+package "商品" {
+  usecase "创建 / 编辑商品（草稿）" as UC10
+  usecase "提交审核" as UC11
+  usecase "审核商品（通过 / 驳回）" as UC12
+  usecase "下架商品" as UC13
+  usecase "调整商品价格" as UC14
+  usecase "删除商品（违规）" as UC15
+}
+
+package "检索" {
+  usecase "多条件搜索商品" as UC20
+  usecase "查看商品详情" as UC21
+}
+
+package "预约与交易" {
+  usecase "预约商品" as UC30
+  usecase "取消预约" as UC31
+  usecase "确认预约（24h 内）" as UC32
+  usecase "买家下单" as UC33
+  usecase "取消下单" as UC34
+  usecase "确认线下交付（交易完成）" as UC35
+  usecase "查看交易对方联系方式" as UC36
+  usecase "超时自动失效 / 自动取消" as UC37
+}
+
+package "信用与风控" {
+  usecase "提交举报" as UC40
+  usecase "处理举报" as UC41
+  usecase "累计违约并封禁" as UC42
+  usecase "申请解封 / 审批解封" as UC43
+}
+
+package "审计与统计" {
+  usecase "查询操作记录" as UC50
+  usecase "查看统计报表" as UC51
+}
+
+B --> UC01
+B --> UC02
+B --> UC20
+B --> UC21
+B --> UC30
+B --> UC31
+B --> UC33
+B --> UC34
+B --> UC36
+B --> UC40
+B --> UC43
+
+S --> UC01
+S --> UC02
+S --> UC10
+S --> UC11
+S --> UC13
+S --> UC14
+S --> UC30
+S --> UC32
+S --> UC35
+S --> UC36
+S --> UC40
+S --> UC43
+
+A --> UC02
+A --> UC12
+A --> UC15
+A --> UC41
+A --> UC43
+A --> UC50
+A --> UC51
+
+T --> UC37
+
+UC30 ..> UC03 : «include»
+UC33 ..> UC03 : «include»
+UC11 ..> UC03 : «include»
+UC12 ..> UC02 : «include»
+UC30 ..> UC21 : «extend»
+UC41 ..> UC42 : «include»
+
+@enduml

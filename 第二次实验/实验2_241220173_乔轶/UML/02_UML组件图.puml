@@ -1,0 +1,71 @@
+@startuml
+' ============================================================
+' 二手交易系统 UML 组件图（v1 初稿：5 个业务模块）
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam componentStyle rectangle
+skinparam nodesep 30
+skinparam ranksep 34
+skinparam component {
+  BackgroundColor #F7F9FC
+  BorderColor #5B7DB1
+  ArrowColor #5B7DB1
+}
+skinparam databaseBackgroundColor #EAF1F8
+scale 1.5
+
+package "客户端" {
+  [买家 H5\n搜索 / 预约 / 下单] as buyer
+  [卖家 H5\n商品 / 审核提交 / 确认] as seller
+  [管理员后台\n审核 / 举报 / 统计 / 审计] as admin
+}
+
+package "应用服务（Spring Boot 单实例）" {
+  [接入层\n登录拦截 · 角色鉴权 · 参数校验 · 统一异常] as api
+
+  package "业务模块" {
+    [M1 用户与权限\n注册登录 · 失败锁定 · 封禁校验] as m1
+    [M2 商品\n草稿 · 审核 · 上下架 · 调价 · 多条件查询] as m2
+    [M3 交易\n预约 · 确认 · 下单 · 完成 · 超时 · 联系方式] as m3
+    [M4 管理\n举报 · 违约记录 · 封禁] as m4
+    [M5 审计与统计\n操作记录 · 三类统计] as m5
+  }
+  [M0 公共层\n事务模板 · 定时任务 · 日志 · 通用返回] as m0
+}
+
+database "MySQL 8.0" as db
+folder "本地图片目录" as fs
+
+buyer --> api : HTTP/JSON
+seller --> api : HTTP/JSON
+admin --> api : HTTP/JSON
+api --> m1
+api --> m2
+api --> m3
+api --> m4
+api --> m5
+
+m2 --> m1 : 校验角色/封禁
+m3 --> m1 : 校验角色/封禁
+m3 --> m2 : 查商品状态
+m4 --> m2 : 管理员下架/删除
+m4 --> m3 : 作废预约与订单
+m5 --> m3 : 读取订单与商品
+
+m1 --> db
+m2 --> db
+m3 --> db
+m4 --> db
+m5 --> db
+m2 --> fs : 读写图片
+
+note right of m0
+  定时任务：每分钟扫描
+  ① 预约待确认超 24h
+  ② 订单待下单超 24h
+end note
+
+@enduml

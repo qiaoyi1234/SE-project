@@ -1,0 +1,59 @@
+﻿@startuml
+' ============================================================
+' 二手交易系统 UML 时序图：买家预约（v1 初稿：行锁串行）
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam sequence {
+  ArrowColor #5B7DB1
+  ActorBorderColor #5B7DB1
+  LifeLineBorderColor #9FB4D0
+  ParticipantBackgroundColor #F7F9FC
+  ParticipantBorderColor #5B7DB1
+}
+scale 1.4
+autonumber
+
+actor 买家 as B
+participant "预约页\n(买家 H5)" as UI
+participant "ReservationController" as C
+participant "TradeService" as SVC
+participant "ProductMapper" as PM
+participant "ReservationMapper" as RM
+
+B -> UI : 点击「预约」
+UI -> C : POST /api/v1/reservations\n{productId}
+C -> C : 校验登录态与角色
+C -> SVC : reserve(productId, buyerId)
+
+activate SVC
+SVC -> SVC : 开启事务
+SVC -> PM : selectByIdForUpdate(productId)\n（悲观行锁）
+PM --> SVC : 商品行
+
+alt 商品状态 ≠ 已发布 / 非本人可预约
+  SVC --> C : BizException(商品状态已变更)
+  C --> UI : 409 {code: 40901}
+  UI --> B : 提示「该商品已被预约或已下架」
+else 商品状态 = 已发布
+  SVC -> RM : 查询是否存在有效预约
+  alt 已存在有效预约
+    SVC --> C : BizException(重复预约)
+    C --> UI : 409 {code: 40902}
+    UI --> B : 提示「重复提交」
+  else 无有效预约
+    SVC -> RM : insert 预约(待卖家确认, 确认截止 = now+24h)
+    SVC -> PM : update 商品 state=已预约
+    SVC -> SVC : 写操作记录、生成通知
+    SVC -> SVC : 提交事务（行锁释放）
+    SVC --> C : reservationId
+    C --> UI : 201 {reservationId}
+    UI --> B : 跳转预约详情，展示倒计时与卖家联系方式
+  end
+end
+deactivate SVC
+
+@enduml
+
